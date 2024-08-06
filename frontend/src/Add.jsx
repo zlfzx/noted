@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { GetNote, SaveNote } from "../wailsjs/go/notes/Service";
 import { useParams } from "react-router-dom";
 import { useToast } from "./components/ui/use-toast";
+import { GetHttpPort } from "../wailsjs/go/services/App";
 
 export default function Add() {
     const { id } = useParams();
@@ -16,7 +17,28 @@ export default function Add() {
     const [content, setContent] = useState('');
     const [note, setNote] = useState(null);
 
-    const editor = useCreateBlockNote();
+    const editor = useCreateBlockNote({
+        uploadFile: async (file) => {
+            const httpPort = await GetHttpPort().then((port) => {
+                return port
+            })
+
+            const url = "http://localhost:" + httpPort + "/upload-file";
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch(url, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+            
+            return data.path;
+        }
+    });
+
     const { toast } = useToast();
 
     const getNote = async (id) => {
@@ -43,9 +65,6 @@ export default function Add() {
         }
 
         SaveNote(data).then((d) => {
-            // response from backend
-            console.log("Note saved", d)
-
             // redirect to home
             window.location.href = "#/"
             toast({

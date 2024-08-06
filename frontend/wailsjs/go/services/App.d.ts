@@ -3,4 +3,8 @@
 import {context} from '../models';
 import {sqlx} from '../models';
 
+export function GetHttpPort():Promise<number>;
+
+export function SetHttpPort(arg1:any):Promise<void>;
+
 export function Startup(arg1:context.Context,arg2:sqlx.DB):Promise<void>;

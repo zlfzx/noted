@@ -1,16 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
-import { DeleteNote, GetNotes } from "../wailsjs/go/notes/Service";
+import { GetNotes } from "../wailsjs/go/notes/Service";
 import Layout from './components/layout';
 import { Link } from 'react-router-dom';
 import { buttonVariants } from './components/ui/button';
 import CardNote from './components/note';
-import { useToast } from './components/ui/use-toast';
 import { Context } from './store';
 import AlertDelete from './components/alert_delete';
 
 function App() {
-    const { toast } = useToast()
-
     const [state, dispatch] = useContext(Context)
 
     const [mansoryArray, setMansoryArray] = useState([])

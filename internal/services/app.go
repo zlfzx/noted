@@ -8,8 +8,9 @@ import (
 
 // App struct
 type App struct {
-	ctx context.Context
-	db  *sqlx.DB
+	ctx      context.Context
+	db       *sqlx.DB
+	httpPort int
 }
 
 // NewApp creates a new App application struct
@@ -22,4 +23,12 @@ func NewApp() *App {
 func (a *App) Startup(ctx context.Context, db *sqlx.DB) {
 	a.ctx = ctx
 	a.db = db
+}
+
+func (a *App) SetHttpPort(httpPort <-chan int) {
+	a.httpPort = <-httpPort
+}
+
+func (a *App) GetHttpPort() int {
+	return a.httpPort
 }
