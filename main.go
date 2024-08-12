@@ -50,6 +50,9 @@ func main() {
 		},
 		OnShutdown: func(ctx context.Context) {
 			db.Close()
+
+			// remove unused files from ContentFiles
+			note.RemoveUnusedFiles(nil)
 		},
 		Bind: []interface{}{
 			app,

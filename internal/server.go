@@ -4,6 +4,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"noted/internal/services/notes"
 	"os"
 	"path/filepath"
 
@@ -53,6 +54,9 @@ func Server(httpPort chan<- int) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		// add path to uploaded files
+		notes.UploadedFiles[filePath] = false
 
 		// response json with file path
 		w.Header().Set("Content-Type", "application/json")

@@ -2,11 +2,15 @@ package notes
 
 import (
 	"context"
+	"encoding/json"
 	"noted/internal/models"
+	"os"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
+
+var UploadedFiles = make(map[string]bool)
 
 type Service struct {
 	ctx context.Context
@@ -41,10 +45,52 @@ func (s *Service) GetNote(id int) (note models.Note, err error) {
 	`
 
 	err = s.db.Get(&note, query, id)
+
+	if note.ID != 0 {
+		getContentFiles(note.Content)
+	}
+
 	return note, err
 }
 
+func getContentFiles(content string) {
+	var contents []models.Content
+	if err := json.Unmarshal([]byte(content), &contents); err == nil {
+		// set content files to false
+		for file := range UploadedFiles {
+			UploadedFiles[file] = false
+		}
+
+		// Check which files are still in use by the note
+		for _, content := range contents {
+			if content.Type == "image" {
+				if _, ok := UploadedFiles[content.Props.Url]; ok {
+					UploadedFiles[content.Props.Url] = true
+				}
+			}
+		}
+	}
+}
+
+func (s *Service) RemoveUnusedFiles(content *string) {
+	// Get content files
+	if content != nil {
+		getContentFiles(*content)
+	}
+
+	// Remove unused files
+	for file, uploaded := range UploadedFiles {
+		if !uploaded {
+			os.Remove(file)
+		}
+	}
+}
+
 func (s *Service) SaveNote(note models.Note) (models.Note, error) {
+
+	// remove unused files
+	s.RemoveUnusedFiles(&note.Content)
+
 	// If the note has an ID, update it
 	if note.ID != 0 {
 		note.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
